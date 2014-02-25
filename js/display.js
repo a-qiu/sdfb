@@ -15,31 +15,147 @@ function node() {
 
 // TODO
 function initGroups(nodes, groups) {
-	//groups.forEach(function (row) {
-	// row.id should return the id of the person
-	// row.group should retunr the name of the group, for examples Puritans 
-	// })
 
+	var grouparr = {}; // should be a hash map with the key of group and an array of IDs
+	groups.forEach(function(row) {
+
+		var n = true;
+		for (var key in grouparr)
+		{
+			if(key==row.group)
+				n = false;
+		}
+		if (n){
+			grouparr[row.group] = new Array(nodes[row.id].name);
+		}
+		else{
+			//if(nodes[row.id] matches a id)
+			grouparr[row.group].push(nodes[row.id].name);
+		}
+		//console.log(grouparr);
+
+		//row.id should return the id of the person
+		//row.group should retunr the name of the group, for examples Puritans 
+	})
+	//console.log(grouparr);
 	// nodes[1] returns info about person with ID 1.
 	// For instance, you can get the name of person 1 by doing nodes[1].name
 	// which should return 'Sama Kanbour'.
 
-	// attach functions to the search features
 
-	// $("#findonegroup").click(function () {
-	// 		showOneGroup(...);
-	// });
+	//dynamic population of boxes
+	$('#four').typeahead({
+		local: Object.keys(grouparr).sort()
+	});
+	$('#five').typeahead({
+		local: Object.keys(grouparr).sort()
+	});
+	$('#six').typeahead({
+		local: Object.keys(grouparr).sort()
+	});
+	$('#seven').typeahead({
+		local: Object.keys(grouparr).sort()
+	});
+
+
+	$("#findonegroup").click(function () {
+		if ($("#four").val()) {
+			showOneGroup($("#four").val(), grouparr);
+		}
+	});
+	$("#findtwogroup").click(function () {
+		if ($("#five").val() && $("#six").val()) {
+			showTwoGroups($("#five").val(), $("#six").val(), grouparr);
+		}
+	});
 }
 
 // TODO
 function showOneGroup(group, data) {
+	$("group").val("");
+	$("group").text("");
+	//console.log("One Group");
+	var arr = data[group];
 
+	var g="";
+	g+='<thead><tr><td>' + group +'</td></tr></thead>';
+	for (var i=0; i<arr.length; i++)
+	{
+		g+='<tr><td>' + arr[i] + '</td></tr>';
+	}
+	$('group').append('<table>'+g+'</table>');
+
+	//display table here
+	//hidden iframe for group
+	//create a download button so that this 
+	$("#four").val('');
+	$("#four").typeahead('setQuery', '');
 }
 
 // TODO
 function showTwoGroups(group1, group2, data) {
+	//display here
+	//console.log("Two Group");
 
+	//gets the third group of overlaps
+	var arr1 = data[group1];
+	var arr2 = data[group2];
+	var inter = new Array();
+
+	for( var i=0; i<arr1.length;i++){
+		for (var j=0; j<arr2.length; j++){
+
+			if(arr1[i] === arr2[j]){
+				inter.push(arr1[i]);
+				arr1.splice(i,1);
+				arr2.splice(j,1);
+				i--;
+				j--;
+			}
+		}
+	}
+	//console.log("one"+arr1+"\ntwo"+arr2+"\ntogether"+inter);
+
+	//display table here
+	//$("group").append('<table>');
+	var g="";
+	g+='<thead><tr><td>' + group1+"</td> <td>"+group1+" & "+group2+"</td> <td>"+group2 +'</td></tr></thead>';	
+	var nmax=Math.max(arr1.length, arr2.length,inter.length)
+	for (var n=0; n<nmax; n++)
+	{
+		g+='<tr>';
+		if(n<arr1.length){
+			g+= '<td>'+ arr1[n]+'</td>';
+		}
+		else{
+			g+= '<td></td>';
+		}
+
+		if(n<inter.length)
+			g+= '<td>'+inter[n]+'</td>';
+		else
+			g+= '<td></td>';
+
+		if(n<arr2.length)
+			g+= '<td>' + arr2[n]+'</td>';
+		else
+			g+='<td></td>';
+
+		g+='</tr>';
+	}
+	$('group').append('<table>'+g+'</table>');
+
+
+	//hidden iframe for group
+	//create a download button so that this 
+
+	$("#five").val('');
+	$("#five").typeahead('setQuery', '');
+	$("#six").val('');
+	$("#six").typeahead('setQuery', '');
 }
+
+
 
 
 // Create a dictionnary of nodes and edges to speed up the search
@@ -87,6 +203,9 @@ function initGraph(data){
 		local: Object.keys(data.nodes).sort()
 	});
 	$('#three').typeahead({
+		local: Object.keys(data.nodes).sort()
+	});
+	$('#eight').typeahead({
 		local: Object.keys(data.nodes).sort()
 	});
 
